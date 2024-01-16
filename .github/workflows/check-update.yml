@@ -1,0 +1,41 @@
+name: Check for updates
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - run: |
+          LOCAL_VER=$(git -c 'versionsort.suffix=-' \
+              ls-remote --exit-code --refs --sort='version:refname' --tags https://github.com/NavyStack/PGadmin.git \
+              | tail --lines=1 \
+              | cut --delimiter='/' --fields=3)
+          RELEASE_VER=$(git -c 'versionsort.suffix=-' \
+              ls-remote --exit-code --refs --sort='version:refname' --tags https://github.com/pgadmin-org/pgadmin4.git 'REL-*_*' \
+              | tail --lines=1 \
+              | cut --delimiter='/' --fields=3)
+          if [[ $RELEASE_VER =~ ^REL-([0-9]+)_([0-9]+)_([0-9]+)$ ]]; then
+              # Matches REL-X_Y_Z and converts to vX.Y.Z
+              FORMATTED_RELEASE_VER=$(echo $RELEASE_VER | sed -E 's/REL-([0-9]+)_([0-9]+)_([0-9]+)/v\1.\2.\3/')
+          elif [[ $RELEASE_VER =~ ^REL-([0-9]+)_([0-9]+)$ ]]; then
+              # Matches REL-X_Y and converts to vX.Y.0
+              FORMATTED_RELEASE_VER=$(echo $RELEASE_VER | sed -E 's/REL-([0-9]+)_([0-9]+)/v\1.\2.0/')
+          fi
+          if [[ $FORMATTED_RELEASE_VER != $LOCAL_VER ]]; then
+              echo "Local version: $LOCAL_VER"
+              echo "Latest upstream version: $FORMATTED_RELEASE_VER"
+              echo "Updating to latest version..."
+              git tag $FORMATTED_RELEASE_VER
+              git push origin $FORMATTED_RELEASE_VER
+          else
+              echo "No updates available..."
+          fi

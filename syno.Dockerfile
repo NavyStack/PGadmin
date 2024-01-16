@@ -68,8 +68,8 @@ COPY --from=postgres:16-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/p
 
 FROM python:3.11-slim-bookworm as layer-cutter
 ARG user=pgadmin
-RUN groupadd --system --gid 1000 $user && \
-    useradd --system --gid $user --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1000 $user
+RUN groupadd --system --gid 100 $user && \
+    useradd --system --gid $user --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1026 $user
 COPY --from=env-builder --chown=$user:$user /venv /venv
 COPY --from=tool-builder --chown=$user:$user /usr/local/pgsql /usr/local/
 COPY --from=app-builder --chown=$user:$user /pgadmin4/web /pgadmin4
@@ -105,8 +105,8 @@ RUN apt-get update && \
 
 FROM python:3.11-slim-bookworm as final
 ARG user=pgadmin
-RUN groupadd --system --gid 1000 $user && \
-    useradd --system --gid $user --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1000 $user
+RUN groupadd --system --gid 100 $user && \
+    useradd --system --gid $user --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1026 $user
 
 COPY --from=layer-cutter --chown=$user:$user /pgadmin4 /pgadmin4
 COPY --from=tool-builder --chown=$user:$user /usr/local/pgsql /usr/local/
