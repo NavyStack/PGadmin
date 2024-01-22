@@ -15,8 +15,7 @@ RUN rm -rf /pgadmin4/web/*.log \
 
 WORKDIR /pgadmin4/web
 
-RUN --mount=type=cache,target=/pgadmin4/web/node_modules/ \
-    export CPPFLAGS="-DPNG_ARM_NEON_OPT=0" && \
+RUN export CPPFLAGS="-DPNG_ARM_NEON_OPT=0" && \
     yarn set version berry && \
     yarn set version 3 && \
     yarn install && \
