@@ -28,7 +28,9 @@ RUN export CPPFLAGS="-DPNG_ARM_NEON_OPT=0" && \
            jest.config.js \
            babel.* \
            ./pgadmin/static/js/generated/.cache \
+           .[!.]* \
     && find . -mindepth 1 -maxdepth 1 -name '.*' ! -name '.' ! -name '..' -exec bash -c 'echo "Deleting {}"; rm -rf {}' \;
+
 
 FROM python:3.11-bookworm AS env-builder
 
