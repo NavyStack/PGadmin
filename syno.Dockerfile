@@ -77,11 +77,11 @@ COPY --from=git /pgadmin4/LICENSE /pgadmin4/LICENSE
 COPY --from=git /pgadmin4/DEPENDENCIES /pgadmin4/DEPENDENCIES
 
 RUN mkdir -p /var/lib/pgadmin && \
-    chown pgadmin:pgadmin /var/lib/pgadmin && \
+    chown pgadmin:users /var/lib/pgadmin && \
     touch /pgadmin4/config_distro.py && \
-    chown pgadmin:pgadmin /pgadmin4/config_distro.py && \
+    chown pgadmin:users /pgadmin4/config_distro.py && \
     chmod g=u /var/lib/pgadmin /pgadmin4/config_distro.py /etc/passwd && \
-    chown -R pgadmin:pgadmin /pgadmin4
+    chown -R pgadmin:users /pgadmin4
 
 FROM python:3.11-slim-bookworm as final
 ARG user=pgadmin
@@ -105,7 +105,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /var/lib/pgadmin && \
-    chown pgadmin:pgadmin /var/lib/pgadmin && \
+    chown pgadmin:users /var/lib/pgadmin && \
     chmod g=u /var/lib/pgadmin /pgadmin4/config_distro.py /etc/passwd && \
     setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/python3.11 && \
     echo "pgadmin ALL = NOPASSWD: /usr/sbin/postfix start" >> /etc/sudoers.d/postfix
