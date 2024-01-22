@@ -85,9 +85,6 @@ jobs:
           file: 1009.Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/pgadmin:pgadmin
-            ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/pgadmin:pgadmin-${{ env.NOW }}
-            navystack/navystack:pgadmin
             navystack/navystack:pgadmin-${{ env.NOW }}
           platforms: linux/amd64,linux/arm64/v8
 
