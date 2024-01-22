@@ -21,7 +21,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: navystack/pgadmin
+          images: |
+          navystack/pgadmin
+          ghcr.io/navystack/pgadmin
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
