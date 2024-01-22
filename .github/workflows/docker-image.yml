@@ -96,6 +96,9 @@ jobs:
         with:
           file: debian.Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+            ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/pgadmin:armv7-${{ env.NOW }}
+            navystack/navystack:armv7-${{ env.NOW }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
