@@ -72,7 +72,6 @@ jobs:
         with:
           file: syno.Dockerfile
           push: true
-          pull: true
           tags: |
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/pgadmin:syno
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/pgadmin:syno-${{ env.NOW }}
@@ -85,7 +84,6 @@ jobs:
         with:
           file: 1009.Dockerfile
           push: true
-          pull: true
           tags: |
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/pgadmin:pgadmin
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/pgadmin:pgadmin-${{ env.NOW }}
@@ -98,7 +96,6 @@ jobs:
         with:
           file: debian.Dockerfile
           push: true
-          pull: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
