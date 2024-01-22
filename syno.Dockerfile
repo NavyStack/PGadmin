@@ -60,7 +60,8 @@ COPY --from=postgres:14-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/p
 COPY --from=postgres:15-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-15/
 COPY --from=postgres:16-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-16/
 COPY --from=app-builder --chown=$user:$user /pgadmin4/web /pgadmin4
-RUN rm -rf node_modules \
+RUN cd /pgadmin4 \
+    && rm -rf node_modules \
            yarn.lock \
            package.json \
            babel.cfg \
