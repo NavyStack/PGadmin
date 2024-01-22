@@ -20,7 +20,16 @@ RUN --mount=type=cache,target=/pgadmin4/web/node_modules/ \
     yarn set version berry && \
     yarn set version 3 && \
     yarn install && \
-    yarn run bundle
+    yarn run bundle && \
+    rm -rf node_modules \
+           yarn.lock \
+           package.json \
+           babel.cfg \
+           webpack.* \
+           jest.config.js \
+           babel.* \
+           ./pgadmin/static/js/generated/.cache \
+    && find . -mindepth 1 -maxdepth 1 -name '.*' ! -name '.' ! -name '..' -exec bash -c 'echo "Deleting {}"; rm -rf {}' \;
 
 FROM python:3.11-bookworm AS env-builder
 
@@ -52,6 +61,7 @@ RUN rm -rf /pgadmin4/docs/en_US/_build/html/_static/*.png
 FROM python:3.11-slim-bookworm as layer-cutter
 ARG user=pgadmin
 RUN useradd --system --gid users --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1026 $user
+
 COPY --from=env-builder --chown=$user:$user /venv /venv
 COPY --from=postgres:12-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-12/
 COPY --from=postgres:13-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-13/
@@ -59,16 +69,6 @@ COPY --from=postgres:14-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/p
 COPY --from=postgres:15-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-15/
 COPY --from=postgres:16-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-16/
 COPY --from=app-builder --chown=$user:$user /pgadmin4/web /pgadmin4
-RUN cd /pgadmin4 \
-    && rm -rf node_modules \
-           yarn.lock \
-           package.json \
-           babel.cfg \
-           webpack.* \
-           jest.config.js \
-           babel.* \
-           ./pgadmin/static/js/generated/.cache \
-    && find . -mindepth 1 -maxdepth 1 -name '.*' ! -name '.' ! -name '..' -exec bash -c 'echo "Deleting {}"; rm -rf {}' \;
 COPY --from=docs-builder --chown=$user:$user /pgadmin4/docs/en_US/_build/html/ /pgadmin4/docs
 COPY --from=git --chown=$user:$user /pgadmin4/pkg/docker/run_pgadmin.py /pgadmin4
 COPY --from=git --chown=$user:$user /pgadmin4/pkg/docker/gunicorn_config.py /pgadmin4
