@@ -90,7 +90,7 @@ ARG user=pgadmin
 RUN useradd --system --gid users --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1026 $user
 
 COPY --from=layer-cutter --chown=$user:$user /pgadmin4 /pgadmin4
-COPY --from=layer-cutter --chown=$user:$user /usr/local/pgsql /usr/local/
+COPY --from=tool-builder --chown=$user:$user /usr/local/pgsql /usr/local/
 COPY --from=layer-cutter --chown=$user:$user /venv /venv
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -qq install \
