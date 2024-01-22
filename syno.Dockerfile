@@ -51,8 +51,8 @@ RUN rm -rf /pgadmin4/docs/en_US/_build/html/_static/*.png
 
 FROM python:3.11-slim-bookworm as layer-cutter
 ARG user=pgadmin
-RUN groupadd --system --gid 1000 $user && \
-    useradd --system --gid $user --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1000 $user
+RUN groupadd --system --gid 100 $user && \
+    useradd --system --gid $user --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1026 $user
 COPY --from=env-builder --chown=$user:$user /venv /venv
 COPY --from=postgres:12-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-12/
 COPY --from=postgres:13-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-13/
