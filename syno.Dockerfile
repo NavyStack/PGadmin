@@ -86,8 +86,7 @@ RUN mkdir -p /var/lib/pgadmin && \
 
 FROM python:3.11-slim-bookworm as final
 ARG user=pgadmin
-RUN groupadd --system --gid 100 $user && \
-    useradd --system --gid $user --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1026 $user
+RUN useradd --system --gid users --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1026 $user
 
 COPY --from=layer-cutter --chown=$user:$user /pgadmin4 /pgadmin4
 COPY --from=layer-cutter --chown=$user:$user /usr/local/pgsql /usr/local/
