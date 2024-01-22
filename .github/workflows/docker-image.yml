@@ -67,6 +67,18 @@ jobs:
           username: ${{ env.REPO_OWNER_LOWERCASE }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: debian-node_modules
+          key: ${{ runner.os }}-debian-node_modules-cache-${{ hashFiles('debian.Dockerfile') }}
+
+      - name: inject cache into docker
+        uses: reproducible-containers/buildkit-cache-dance@v2.1.2
+        with:
+          cache-source: debian-node_modules
+          cache-target: /pgadmin4/web/node_modules/
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -78,6 +90,8 @@ jobs:
             navystack/pgadmin:syno
             navystack/pgadmin:syno-${{ env.NOW }}
           platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -90,6 +104,8 @@ jobs:
             navystack/navystack:pgadmin
             navystack/navystack:pgadmin-${{ env.NOW }}
           platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -99,3 +115,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

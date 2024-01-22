@@ -1,5 +1,5 @@
 FROM node:latest AS git
-RUN git clone https://github.com/pgadmin-org/pgadmin4.git
+RUN git clone --recurse-submodules -j8 --depth 1 https://github.com/pgadmin-org/pgadmin4.git
 
 FROM node:latest AS app-builder
 
@@ -15,20 +15,12 @@ RUN rm -rf /pgadmin4/web/*.log \
 
 WORKDIR /pgadmin4/web
 
-RUN export CPPFLAGS="-DPNG_ARM_NEON_OPT=0" && \
+RUN --mount=type=cache,target=/pgadmin4/web/node_modules/ \
+    export CPPFLAGS="-DPNG_ARM_NEON_OPT=0" && \
     yarn set version berry && \
     yarn set version 3 && \
     yarn install && \
-    yarn run bundle \
-    && rm -rf node_modules \
-           yarn.lock \
-           package.json \
-           babel.cfg \
-           webpack.* \
-           jest.config.js \
-           babel.* \
-           ./pgadmin/static/js/generated/.cache \
-           .[!.]*
+    yarn run bundle
 
 FROM python:3.11-bookworm AS env-builder
 
@@ -57,22 +49,26 @@ RUN rm -rf /pgadmin4/docs/en_US/_build/html/.doctrees
 RUN rm -rf /pgadmin4/docs/en_US/_build/html/_sources
 RUN rm -rf /pgadmin4/docs/en_US/_build/html/_static/*.png
 
-
-FROM node:latest AS tool-builder
-COPY --from=postgres:12-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-12/
-COPY --from=postgres:13-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-13/
-COPY --from=postgres:14-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-14/
-COPY --from=postgres:15-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-15/
-COPY --from=postgres:16-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-16/
-
-
 FROM python:3.11-slim-bookworm as layer-cutter
 ARG user=pgadmin
 RUN groupadd --system --gid 1000 $user && \
     useradd --system --gid $user --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1000 $user
 COPY --from=env-builder --chown=$user:$user /venv /venv
-COPY --from=tool-builder --chown=$user:$user /usr/local/pgsql /usr/local/
+COPY --from=postgres:12-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-12/
+COPY --from=postgres:13-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-13/
+COPY --from=postgres:14-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-14/
+COPY --from=postgres:15-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-15/
+COPY --from=postgres:16-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-16/
 COPY --from=app-builder --chown=$user:$user /pgadmin4/web /pgadmin4
+RUN rm -rf node_modules \
+           yarn.lock \
+           package.json \
+           babel.cfg \
+           webpack.* \
+           jest.config.js \
+           babel.* \
+           ./pgadmin/static/js/generated/.cache \
+    && find . -mindepth 1 -maxdepth 1 -name '.*' ! -name '.' ! -name '..' -exec bash -c 'echo "Deleting {}"; rm -rf {}' \;
 COPY --from=docs-builder --chown=$user:$user /pgadmin4/docs/en_US/_build/html/ /pgadmin4/docs
 COPY --from=git --chown=$user:$user /pgadmin4/pkg/docker/run_pgadmin.py /pgadmin4
 COPY --from=git --chown=$user:$user /pgadmin4/pkg/docker/gunicorn_config.py /pgadmin4
@@ -80,23 +76,7 @@ COPY --from=git --chown=$user:$user /pgadmin4/pkg/docker/entrypoint.sh /pgadmin4
 COPY --from=git /pgadmin4/LICENSE /pgadmin4/LICENSE
 COPY --from=git /pgadmin4/DEPENDENCIES /pgadmin4/DEPENDENCIES
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get -qq install \
-        apt-utils \
-        postfix \
-        krb5-user \
-        libjpeg62-turbo \
-        sudo \
-        tzdata \
-        libedit2 \
-        libldap-2.5-0 \
-        libcap2-bin \
-        libpq-dev && \
-    /venv/bin/python3 -m pip install --no-cache-dir gunicorn==20.1.0 && \
-    find . | grep -E "(/__pycache__$|\.pyc$|\.pyo$)" | xargs rm -rf && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /var/lib/pgadmin && \
+RUN mkdir -p /var/lib/pgadmin && \
     chown pgadmin:pgadmin /var/lib/pgadmin && \
     touch /pgadmin4/config_distro.py && \
     chown pgadmin:pgadmin /pgadmin4/config_distro.py && \
@@ -109,7 +89,7 @@ RUN groupadd --system --gid 1000 $user && \
     useradd --system --gid $user --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1000 $user
 
 COPY --from=layer-cutter --chown=$user:$user /pgadmin4 /pgadmin4
-COPY --from=tool-builder --chown=$user:$user /usr/local/pgsql /usr/local/
+COPY --from=layer-cutter --chown=$user:$user /usr/local/pgsql /usr/local/
 COPY --from=layer-cutter --chown=$user:$user /venv /venv
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -qq install \
@@ -123,8 +103,6 @@ RUN apt-get update && \
         libldap-2.5-0 \
         libcap2-bin \
         libpq-dev && \
-    /venv/bin/python3 -m pip install --no-cache-dir gunicorn==20.1.0 && \
-    find . | grep -E "(/__pycache__$|\.pyc$|\.pyo$)" | xargs rm -rf && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /var/lib/pgadmin && \
