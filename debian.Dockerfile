@@ -15,6 +15,10 @@ RUN rm -rf /pgadmin4/web/*.log \
 
 WORKDIR /pgadmin4/web
 
+RUN if [ "$TARGETARCH" = "arm" ]; then \
+    sed -i 's@NODE_OPTIONS=--max-old-space-size=2048@NODE_OPTIONS=--max-old-space-size=12288@g' ./package.json; \
+    fi
+
 RUN export CPPFLAGS="-DPNG_ARM_NEON_OPT=0" && \
     yarn set version berry && \
     yarn set version 3 && \
