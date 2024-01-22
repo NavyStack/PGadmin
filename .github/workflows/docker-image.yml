@@ -67,7 +67,7 @@ jobs:
           username: ${{ env.REPO_OWNER_LOWERCASE }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push (syno)
         uses: docker/build-push-action@v5
         with:
           file: syno.Dockerfile
@@ -79,7 +79,7 @@ jobs:
             navystack/pgadmin:syno-${{ env.NOW }}
           platforms: linux/amd64,linux/arm64
 
-      - name: Build and push
+      - name: Build and push (OCI)
         uses: docker/build-push-action@v5
         with:
           file: 1009.Dockerfile
@@ -91,7 +91,7 @@ jobs:
             navystack/navystack:pgadmin-${{ env.NOW }}
           platforms: linux/amd64,linux/arm64
 
-      - name: Build and push
+      - name: Build and push (Debian)
         uses: docker/build-push-action@v5
         with:
           file: debian.Dockerfile
