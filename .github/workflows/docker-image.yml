@@ -71,31 +71,31 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           file: syno.Dockerfile
-          push: true
           tags: |
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/pgadmin:syno
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/pgadmin:syno-${{ env.NOW }}
             navystack/pgadmin:syno
             navystack/pgadmin:syno-${{ env.NOW }}
           platforms: linux/amd64,linux/arm64/v8
+          outputs: type=image,compression=zstd,compression-level=22,force-compression=true,push=true
 
       - name: Build and push (OCI)
         uses: docker/build-push-action@v5
         with:
           file: 1009.Dockerfile
-          push: true
           tags: |
             navystack/navystack:pgadmin-${{ env.NOW }}
           platforms: linux/amd64,linux/arm64/v8
+          outputs: type=image,compression=zstd,compression-level=22,force-compression=true,push=true
 
       - name: Build and push (Debian)
         uses: docker/build-push-action@v5
         with:
           file: debian.Dockerfile
-          push: true
           tags: |
             ${{ steps.meta.outputs.tags }}
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/pgadmin:armv7-${{ env.NOW }}
             navystack/navystack:armv7-${{ env.NOW }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          outputs: type=image,compression=zstd,compression-level=22,force-compression=true,push=true
