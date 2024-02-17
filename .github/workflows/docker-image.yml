@@ -77,7 +77,7 @@ jobs:
             navystack/pgadmin:syno
             navystack/pgadmin:syno-${{ env.NOW }}
           platforms: linux/amd64,linux/arm64/v8
-          outputs: type=image,compression=zstd,compression-level=22,force-compression=true,push=true
+          outputs: type=image,push=true
 
       - name: Build and push (OCI)
         uses: docker/build-push-action@v5
@@ -86,7 +86,7 @@ jobs:
           tags: |
             navystack/navystack:pgadmin-${{ env.NOW }}
           platforms: linux/amd64,linux/arm64/v8
-          outputs: type=image,compression=zstd,compression-level=22,force-compression=true,push=true
+          outputs: type=image,push=true
 
       - name: Build and push (Debian)
         uses: docker/build-push-action@v5
@@ -98,4 +98,4 @@ jobs:
             navystack/navystack:armv7-${{ env.NOW }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
-          outputs: type=image,compression=zstd,compression-level=22,force-compression=true,push=true
+          outputs: type=image,push=true
