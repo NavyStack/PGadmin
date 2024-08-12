@@ -60,7 +60,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push (syno)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           file: syno.Dockerfile
           tags: |
@@ -72,7 +72,7 @@ jobs:
           outputs: type=image,push=true
 
       - name: Build and push (OCI)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           file: 1009.Dockerfile
           tags: |
@@ -81,7 +81,7 @@ jobs:
           outputs: type=image,push=true
 
       - name: Build and push (Debian)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           file: debian.Dockerfile
           tags: |
