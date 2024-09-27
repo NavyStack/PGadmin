@@ -63,11 +63,11 @@ RUN rm -rf /pgadmin4/docs/en_US/_build/html/_sources
 RUN rm -rf /pgadmin4/docs/en_US/_build/html/_static/*.png
 
 FROM node:latest AS tool-builder
-COPY --from=postgres:12-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-12/
-COPY --from=postgres:13-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-13/
-COPY --from=postgres:14-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-14/
-COPY --from=postgres:15-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-15/
-COPY --from=postgres:16-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-16/
+COPY --from=postgres:17-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-12/
+COPY --from=postgres:17-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-13/
+COPY --from=postgres:17-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-14/
+COPY --from=postgres:17-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-15/
+COPY --from=postgres:17-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-16/
 
 FROM python:3.11-slim-bookworm as layer-cutter
 ARG user=pgadmin
