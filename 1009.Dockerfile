@@ -32,7 +32,7 @@ RUN export CPPFLAGS="-DPNG_ARM_NEON_OPT=0" && \
     && find . -mindepth 1 -maxdepth 1 -name '.*' ! -name '.' ! -name '..' -exec bash -c 'echo "Deleting {}"; rm -rf {}' \;
 
 
-FROM python:3.11-bookworm AS env-builder
+FROM python:3.14-bookworm AS env-builder
 
 COPY --from=git /pgadmin4/requirements.txt /
 RUN apt update && apt install -y \
@@ -66,7 +66,7 @@ COPY --from=postgres:14-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/p
 COPY --from=postgres:15-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-15/
 COPY --from=postgres:16-bookworm /usr/bin/pg_dump /usr/bin/pg_dumpall /usr/bin/pg_restore /usr/bin/psql /usr/local/pgsql/pgsql-16/
 
-FROM python:3.11-slim-bookworm as layer-cutter
+FROM python:3.14-slim-bookworm as layer-cutter
 ARG user=pgadmin
 RUN groupadd --system --gid 1010 $user && \
     useradd --system --gid $user --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1009 $user
@@ -87,7 +87,7 @@ RUN mkdir -p /var/lib/pgadmin && \
     chmod g=u /var/lib/pgadmin /pgadmin4/config_distro.py /etc/passwd && \
     chown -R pgadmin:pgadmin /pgadmin4
 
-FROM python:3.11-slim-bookworm as final
+FROM python:3.14-slim-bookworm as final
 ARG user=pgadmin
 RUN groupadd --system --gid 1010 $user && \
     useradd --system --gid $user --no-create-home --home /nonexistent --comment "pgadmin user" --shell /bin/false --uid 1009 $user
