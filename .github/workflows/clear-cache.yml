@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Purge caches
-        uses: MyAlbum/purge-cache@v2
+        uses: MyAlbum/purge-cache@v3
         with:
           max-age: 0
           token: ${{ secrets.GH_PAT }}
